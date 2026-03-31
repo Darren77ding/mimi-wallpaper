@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useUser, useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function WallpaperInput() {
   const [description, setDescription] = useState("");
@@ -11,6 +12,7 @@ export default function WallpaperInput() {
 
   const { isSignedIn } = useUser();
   const { openSignIn } = useClerk();
+  const router = useRouter();
 
   const generateWallpaper = async function () {
     if (!isSignedIn) {
@@ -39,8 +41,8 @@ export default function WallpaperInput() {
 
       if (code === 1 && data?.imageUrl) {
         setGeneratedImage(data.imageUrl);
-        // Refresh page after a slight delay to update the gallery
-        setTimeout(() => window.location.reload(), 1500);
+        // Refresh server components (Gallery) smoothly without losing client state
+        router.refresh();
       } else {
         setError(message || "生成失败，稍后再试");
       }
@@ -81,7 +83,7 @@ export default function WallpaperInput() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span>踩奶生成中...</span>
+              <span>魔法渲染中...</span>
             </>
           ) : (
             <span className="flex items-center gap-1">爪击生成 <span className="text-xs group-hover:rotate-12 transition-transform">🐾</span></span>
@@ -102,7 +104,7 @@ export default function WallpaperInput() {
             </div>
           </div>
           <p className="mt-6 text-center text-sm font-medium text-gray-500">
-            喵！成功获取壁纸！页面即将刷新展示最新画廊...
+            喵！壁纸渲染成功！已为你自动挂入画廊。
           </p>
         </div>
       )}
