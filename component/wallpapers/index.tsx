@@ -40,14 +40,14 @@ export default function Wallpapers() {
         ) : !wallpapers || wallpapers.length === 0 ? (
           <div className="text-center py-12 text-gray-500 bg-white rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center">
              <span className="text-4xl mb-4 opacity-50">😿</span>
-            猫薄荷还没起效，暂时没有壁纸，你是第一个见证魔力的人。
+            暂时没有壁纸，你是第一个见证魔力的人。
           </div>
         ) : (
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
             {wallpapers.map((wallpaper, idx) => (
               <div
                 key={wallpaper.id || idx}
-                className="group relative break-inside-avoid overflow-hidden rounded-2xl bg-gray-100 mb-6 cursor-pointer shadow-sm ring-1 ring-gray-900/5 transition-all hover:shadow-xl hover:ring-gray-900/10"
+                className="group relative overflow-hidden rounded-2xl bg-gray-100 cursor-pointer shadow-sm ring-1 ring-gray-900/5 transition-all hover:shadow-xl hover:ring-gray-900/10"
               >
                 <img
                   src={wallpaper.imageUrl}
