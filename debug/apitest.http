@@ -1,0 +1,16 @@
+@baseUrl=http://localhost:3000/api 
+
+###test
+POST {{baseUrl}}/test 
+
+### generate wallpaper
+POST {{baseUrl}}/gen-wallpaper
+Content-Type: application/json
+
+{
+    "prompt": "happy new year newyork 2026, 16:9 aspect ratio, high resolution desktop wallpaper"
+}
+
+
+### get wallpapers
+GET {{baseUrl}}/get-wallpapers
