@@ -9,6 +9,25 @@ export default function WallpaperInput() {
   const [loading, setLoading] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [aspectRatio, setAspectRatio] = useState("1:1");
+  const [style, setStyle] = useState("none");
+  const [referenceImage, setReferenceImage] = useState<string | null>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("参考图片不能超过 5MB 哦");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReferenceImage(reader.result as string);
+        setError(null);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const { isSignedIn } = useUser();
   const { openSignIn } = useClerk();
@@ -34,7 +53,7 @@ export default function WallpaperInput() {
       const result = await fetch("/api/gen-wallpaper", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: description }),
+        body: JSON.stringify({ prompt: description, aspectRatio, style, referenceImage }),
       });
 
       const { code, data, message } = await result.json();
@@ -85,12 +104,71 @@ export default function WallpaperInput() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span>魔法渲染中...</span>
+              <span>{referenceImage ? "视觉解析融合中..." : "魔法渲染中..."}</span>
             </>
           ) : (
             <span className="flex items-center gap-1">爪击生成 <span className="text-xs group-hover:rotate-12 transition-transform">🐾</span></span>
           )}
         </button>
+      </div>
+
+      {/* 附加参数控制条 */}
+      <div className={`mt-5 w-full flex flex-wrap items-center justify-between gap-4 px-2 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
+        
+        <div className="flex flex-wrap items-center gap-4">
+          {/* 尺寸下拉框 */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-500">📏 比例</span>
+            <select
+              value={aspectRatio}
+              onChange={(e) => setAspectRatio(e.target.value)}
+              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 outline-none hover:border-amber-300 focus:ring-2 focus:ring-amber-500/30 transition-all cursor-pointer shadow-sm"
+            >
+              <option value="1:1">1:1 (默认方形)</option>
+              <option value="16:9">16:9 (电脑壁纸)</option>
+              <option value="9:16">9:16 (手机壁纸)</option>
+            </select>
+          </div>
+
+          {/* 风格下拉框 */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-500">🎨 风格</span>
+            <select
+              value={style}
+              onChange={(e) => setStyle(e.target.value)}
+              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 outline-none hover:border-amber-300 focus:ring-2 focus:ring-amber-500/30 transition-all cursor-pointer shadow-sm"
+            >
+              <option value="none">自由生成 (默认)</option>
+              <option value="anime">日系动漫 (Anime)</option>
+              <option value="cyberpunk">赛博朋克 (Cyberpunk)</option>
+              <option value="minimalist">极简黑白 (Minimalist)</option>
+              <option value="photorealistic">超写实摄影 (Photo)</option>
+              <option value="watercolor">水彩绘本风 (Watercolor)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* 上传参考图按钮 */}
+        <div className="flex items-center">
+          {referenceImage ? (
+            <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-1.5 pr-4 shadow-sm animate-in fade-in slide-in-from-right-2">
+              <img src={referenceImage} alt="Reference" className="h-9 w-9 rounded-lg object-cover ring-1 ring-black/5" />
+              <div className="flex flex-col">
+                 <span className="text-xs font-bold text-amber-800 tracking-tight">已开启图生图</span>
+                 <span className="text-[10px] text-amber-600/80">AI 将提取特征并重绘</span>
+              </div>
+              <button onClick={() => setReferenceImage(null)} className="ml-2 text-amber-600/60 hover:text-red-500 p-1 rounded-full hover:bg-white transition-all">✖</button>
+            </div>
+          ) : (
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-gray-300 bg-gray-50/50 px-5 py-2.5 text-sm font-medium text-gray-600 hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700 active:scale-95 transition-all shadow-sm">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16L8.586 11.414a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>+ 上传参考图</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            </label>
+          )}
+        </div>
       </div>
 
       {error && <p className="mt-4 text-sm font-medium text-red-500 bg-red-50 px-3 py-1 rounded-full">{error}</p>}

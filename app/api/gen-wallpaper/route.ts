@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { generateImage } from "@/service/gemini";
+import { generateImage, analyzeImage } from "@/service/gemini";
 import { supabase } from "@/lib/supabase";
 import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
   try {
-    const { prompt } = await req.json();
+    const { prompt, aspectRatio, style, referenceImage } = await req.json();
 
-    if (!prompt) {
+    if (!prompt && !referenceImage) {
       return NextResponse.json(
-        { code: 0, message: "prompt 不能为空" },
+        { code: 0, message: "提示词或参考图至少需提供一项" },
         { status: 400 }
       );
     }
@@ -23,8 +23,21 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1. 调用 Gemini 生成图片（返回 base64）
-    const base64Image = await generateImage(prompt);
+    let finalPrompt = prompt || "根据图中元素重新生成一幅高清艺术作品";
+
+    // 1. 如果包含参考图（图生图模式），先调用视觉大模型反推细节
+    if (referenceImage) {
+      // 解析 data:image/jpeg;base64,... 的格式
+      const mimeTypeMatch = referenceImage.match(/^data:(image\/\w+);base64,/);
+      const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : "image/jpeg";
+      const base64Data = referenceImage.replace(/^data:image\/\w+;base64,/, "");
+
+      // 调用多模态提取并合并用户指令
+      finalPrompt = await analyzeImage(base64Data, mimeType, finalPrompt);
+    }
+
+    // 2. 调用 Gemini 生成图片并传入高级参数
+    const base64Image = await generateImage(finalPrompt, aspectRatio, style);
 
     // 检查是否真的生成了图片（以 data:image 开头）
     if (!base64Image.startsWith("data:image")) {
@@ -65,8 +78,8 @@ export async function POST(req: Request) {
     // 6. 保存记录到数据库
     const { error: dbError } = await supabase.from("wallpapers").insert({
       image_url: publicUrl,
-      image_description: prompt,
-      image_size: "1024x1024",
+      image_description: prompt || "Image-to-Image Generation",
+      image_size: aspectRatio || "1:1",
       user_id: userId,
     });
 
