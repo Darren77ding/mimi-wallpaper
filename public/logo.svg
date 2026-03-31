@@ -1,4 +1,13 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" rx="128" fill="#111827"/>
-  <path d="M128 320V192L256 256L384 192V320" stroke="#F59E0B" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#F59E0B">
+    <!-- Toes -->
+    <circle cx="140" cy="250" r="36"/>
+    <circle cx="206" cy="160" r="42"/>
+    <circle cx="306" cy="160" r="42"/>
+    <circle cx="372" cy="250" r="36"/>
+    
+    <!-- Main Pad (Premium Smooth Blob) -->
+    <path d="M256 250C315.823 250 358 296 345 348C335 388 286.91 390 256 390C225.09 390 177 388 167 348C154 296 196.177 250 256 250Z"/>
+  </g>
 </svg>
