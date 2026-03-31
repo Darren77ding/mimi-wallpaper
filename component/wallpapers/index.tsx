@@ -21,6 +21,16 @@ export default function Wallpapers() {
 
   useEffect(() => {
     fetchWallpapers();
+
+    // 监听生成组件发出的刷新事件
+    const handleRefresh = () => {
+      fetchWallpapers();
+    };
+    window.addEventListener("refresh-gallery", handleRefresh);
+
+    return () => {
+      window.removeEventListener("refresh-gallery", handleRefresh);
+    };
   }, []);
 
   return (

@@ -43,6 +43,8 @@ export default function WallpaperInput() {
         setGeneratedImage(data.imageUrl);
         // Refresh server components (Gallery) smoothly without losing client state
         router.refresh();
+        // Emit custom event for client-side Gallery component to refetch
+        window.dispatchEvent(new Event("refresh-gallery"));
       } else {
         setError(message || "生成失败，稍后再试");
       }
