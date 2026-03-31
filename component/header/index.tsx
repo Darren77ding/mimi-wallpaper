@@ -12,7 +12,7 @@ export default function Header() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <a href="/" className="flex items-center gap-2 group">
-              <img src="/logo.svg" alt="MiMi Wallpaper" className="h-10 w-auto object-contain transition-transform group-hover:scale-110" />
+              <img src="/logo.png" alt="MiMi Wallpaper" className="h-10 w-auto object-contain transition-transform group-hover:scale-110" />
               <span className="text-lg font-bold tracking-tight text-black">
                 MiMi Wallpaper
               </span>
