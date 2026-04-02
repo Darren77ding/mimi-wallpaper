@@ -124,15 +124,22 @@ export default function WallpaperInput() {
               </svg>
               画幅
             </span>
-            <select
-              value={aspectRatio}
-              onChange={(e) => setAspectRatio(e.target.value)}
-              className="rounded-xl border border-gray-200 bg-white pl-3 pr-10 py-2 text-sm font-medium text-gray-700 outline-none hover:border-amber-300 focus:ring-2 focus:ring-amber-500/30 transition-all cursor-pointer shadow-sm"
-            >
-              <option value="1:1">1:1 (默认方形)</option>
-              <option value="16:9">16:9 (电脑壁纸)</option>
-              <option value="9:16">9:16 (手机壁纸)</option>
-            </select>
+            <div className="relative">
+              <select
+                value={aspectRatio}
+                onChange={(e) => setAspectRatio(e.target.value)}
+                className="appearance-none rounded-xl border border-gray-200 bg-white pl-4 pr-10 py-2 text-sm font-medium text-gray-700 outline-none hover:border-amber-300 focus:ring-2 focus:ring-amber-500/30 transition-all cursor-pointer shadow-sm"
+              >
+                <option value="1:1">1:1 (默认方形)</option>
+                <option value="16:9">16:9 (电脑壁纸)</option>
+                <option value="9:16">9:16 (手机壁纸)</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* 风格下拉框 */}
@@ -143,18 +150,25 @@ export default function WallpaperInput() {
               </svg>
               灵感
             </span>
-            <select
-              value={style}
-              onChange={(e) => setStyle(e.target.value)}
-              className="rounded-xl border border-gray-200 bg-white pl-3 pr-10 py-2 text-sm font-medium text-gray-700 outline-none hover:border-amber-300 focus:ring-2 focus:ring-amber-500/30 transition-all cursor-pointer shadow-sm"
-            >
-              <option value="none">自由生成 (默认)</option>
-              <option value="anime">日系动漫 (Anime)</option>
-              <option value="cyberpunk">赛博朋克 (Cyberpunk)</option>
-              <option value="minimalist">极简黑白 (Minimalist)</option>
-              <option value="photorealistic">超写实摄影 (Photo)</option>
-              <option value="watercolor">水彩绘本风 (Watercolor)</option>
-            </select>
+            <div className="relative">
+              <select
+                value={style}
+                onChange={(e) => setStyle(e.target.value)}
+                className="appearance-none rounded-xl border border-gray-200 bg-white pl-4 pr-10 py-2 text-sm font-medium text-gray-700 outline-none hover:border-amber-300 focus:ring-2 focus:ring-amber-500/30 transition-all cursor-pointer shadow-sm"
+              >
+                <option value="none">自由生成 (默认)</option>
+                <option value="anime">日系动漫 (Anime)</option>
+                <option value="cyberpunk">赛博朋克 (Cyberpunk)</option>
+                <option value="minimalist">极简黑白 (Minimalist)</option>
+                <option value="photorealistic">超写实摄影 (Photo)</option>
+                <option value="watercolor">水彩绘本风 (Watercolor)</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 

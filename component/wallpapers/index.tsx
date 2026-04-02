@@ -4,27 +4,43 @@ import { Wallpaper } from "@/types/wallpaper";
 import { useEffect, useState } from "react";
 
 export default function Wallpapers() {
-  const [wallpapers, setWallpapers] = useState<Wallpaper[] | null>(null);
+  const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
-  const fetchWallpapers = async function () {
+  const fetchWallpapers = async (pageNum: number, isRefresh = false) => {
+    if (pageNum === 1 && isRefresh === false) setLoading(true);
+    else if (pageNum > 1) setLoadingMore(true);
+
     try {
-      const result = await fetch("/api/get-wallpapers");
-      const { data } = await result.json();
-      if (data) setWallpapers(data);
+      const result = await fetch(`/api/get-wallpapers?category=wallpaper&page=${pageNum}`);
+      const { data, hasMore: more } = await result.json();
+      
+      if (data) {
+        if (isRefresh || pageNum === 1) {
+          setWallpapers(data);
+        } else {
+          setWallpapers(prev => [...prev, ...data]);
+        }
+        setHasMore(more);
+        setPage(pageNum);
+      }
     } catch (err) {
       console.error("加载壁纸失败:", err);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
   useEffect(() => {
-    fetchWallpapers();
+    fetchWallpapers(1);
 
     // 监听生成组件发出的刷新事件
     const handleRefresh = () => {
-      fetchWallpapers();
+      fetchWallpapers(1, true);
     };
     window.addEventListener("refresh-gallery", handleRefresh);
 
@@ -93,6 +109,24 @@ export default function Wallpapers() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* 分页按钮 */}
+        {!loading && hasMore && (
+           <div className="mt-12 flex justify-center">
+             <button 
+               onClick={() => fetchWallpapers(page + 1)}
+               disabled={loadingMore}
+               className="rounded-full bg-white px-8 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+             >
+               {loadingMore ? (
+                 <svg className="animate-spin h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+               ) : (
+                 <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+               )}
+               {loadingMore ? '加载中...' : '加载更多'}
+             </button>
+           </div>
         )}
       </div>
     </section>

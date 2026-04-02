@@ -42,8 +42,10 @@ export async function generateImage(prompt: string, aspectRatio: string = "1:1",
       finalPrompt = `[Style: ${style}] ` + finalPrompt;
     }
 
-    // 尝试在 prompt 末尾施加比例限制（由于实验模型可能不吃 generationConfig，用自然语言强约束）
-    if (aspectRatio !== "1:1") {
+    // 尝试在 prompt 末尾施加比例限制或特殊类型约束
+    if (aspectRatio === "emoji") {
+      finalPrompt += `. CRITICAL INSTRUCTION: Generate a chat sticker / meme (表情包). The image MUST have a pure, solid WHITE background (or transparent-like aesthetic). It MUST feature exaggerated, humorous, or highly expressive emotions. Style: flat vector, digital illustration, or cute 3D, perfectly framed in the center like a chat sticker.`;
+    } else if (aspectRatio !== "1:1") {
       const ratioContext = aspectRatio === "16:9" ? "widescreen 16:9 horizontal desktop wallpaper" : "vertical 9:16 mobile wallpaper";
       finalPrompt += `. The resulting image MUST be strictly formatted as a ${ratioContext}.`;
     }
@@ -62,5 +64,47 @@ export async function generateImage(prompt: string, aspectRatio: string = "1:1",
   } catch (err: any) {
     console.error("生成失败:", err);
     throw err;
+  }
+}
+
+// 基于文本故事拆解漫画分镜 (返回JSON)
+export async function generateComicScript(story: string, pages: number) {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    
+    const prompt = `You are an expert comic strip writer and storyboard artist. 
+The user will provide a short diary entry or story about their cat. Your task is to split the story into exactly ${pages} panel(s).
+
+CRUCIAL INSTRUCTION FOR CHARACTER CONSISTENCY:
+First, establish a hyper-specific character design for the protagonist cat based on the user's story (e.g., "A chubby orange tabby cat with a white belly, a small notch its left ear, and big green eyes"). 
+Then, EVERY SINGLE PANEL'S 'prompt' MUST begin with this EXACT character design description word-for-word, followed by the specific setting and action of that panel.
+
+For each panel, you must provide:
+1. "prompt": The locked character design followed by a highly detailed, descriptive English prompt for the scene's action and setting.
+2. "caption": A short, punchy, and engaging Chinese narration or dialogue (Keep it under 15 words) to be displayed under the image.
+
+User Story: "${story}"
+
+Return the result STRICTLY as a JSON array of objects, with no markdown formatting or backticks around it, like this:
+[
+  { "prompt": "...", "caption": "..." }
+]`;
+
+    const result = await model.generateContent(prompt);
+    let text = result.response.text().trim();
+    if (text.startsWith("\`\`\`json")) {
+      text = text.replace(/^\`\`\`json/, "").replace(/\`\`\`$/, "").trim();
+    } else if (text.startsWith("\`\`\`")) {
+      text = text.replace(/^\`\`\`/, "").replace(/\`\`\`$/, "").trim();
+    }
+    
+    const panels = JSON.parse(text);
+    if (!Array.isArray(panels) || panels.length !== pages) {
+      throw new Error("模型返回的分镜数量不正确或格式有误");
+    }
+    return panels;
+  } catch (err: any) {
+    console.error("分镜拆解失败:", err);
+    throw new Error("Failed to generate comic script: " + err.message);
   }
 }
